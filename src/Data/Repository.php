@@ -271,6 +271,8 @@ abstract class Repository implements IRepository, ICripObject
      */
     public function create(array $input)
     {
+        $input = $this->onlyFillable($input);
+
         return $this->modelInstance->create($input);
     }
 
@@ -283,9 +285,8 @@ abstract class Repository implements IRepository, ICripObject
      */
     public function update(array $input, $id, $attribute = 'id')
     {
-        $input = array_intersect_key($input, array_flip($this->modelInstance->getFillable()));
         $model = $this->find($id, $attribute);
-        $model->update($input);
+        $model->update($this->onlyFillable($input));
 
         return $model;
     }
@@ -417,5 +418,16 @@ abstract class Repository implements IRepository, ICripObject
         }
 
         return $this->model;
+    }
+
+    /**
+     * Filter input from un allowed fields for model
+     *
+     * @param array $input
+     * @return array
+     */
+    protected function onlyFillable(array $input)
+    {
+        return array_intersect_key($input, array_flip($this->modelInstance->getFillable()));
     }
 }
