@@ -1,0 +1,20 @@
+{
+  "name": "crip/core",
+  "description": "Crip Laravel core",
+  "require": {
+    "laravel/framework": "^5.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Crip\\Core\\": "src"
+    }
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Igors Krasjukovs",
+      "email": "tahq69@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev"
+}
