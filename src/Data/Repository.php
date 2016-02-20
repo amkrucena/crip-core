@@ -335,6 +335,17 @@ abstract class Repository implements IRepository, ICripObject
     }
 
     /**
+     * Filter input from un allowed fields for model
+     *
+     * @param array $input
+     * @return array
+     */
+    public function onlyFillable(array $input)
+    {
+        return array_intersect_key($input, array_flip($this->modelInstance->getFillable()));
+    }
+
+    /**
      * @param $column
      * @param $value
      * @param string $where_role
@@ -418,16 +429,5 @@ abstract class Repository implements IRepository, ICripObject
         }
 
         return $this->model;
-    }
-
-    /**
-     * Filter input from un allowed fields for model
-     *
-     * @param array $input
-     * @return array
-     */
-    protected function onlyFillable(array $input)
-    {
-        return array_intersect_key($input, array_flip($this->modelInstance->getFillable()));
     }
 }
