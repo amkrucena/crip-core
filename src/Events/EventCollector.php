@@ -1,9 +1,9 @@
 <?php namespace Crip\Core\Events;
 
 use Crip\Core\Contracts\ICripObject;
+use Crip\Core\Data\Model;
 use Crip\Core\Exceptions\BadEventResultException;
 use Crip\Core\Support\Help;
-use Crip\Core\Traits\ValidationExtended;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
@@ -14,7 +14,6 @@ use Illuminate\Support\MessageBag;
  */
 class EventCollector implements ICripObject
 {
-    use ValidationExtended;
 
     /**
      * @var array
@@ -79,15 +78,25 @@ class EventCollector implements ICripObject
      * @param $event_method
      * @param Request $request
      * @param array $input
+     * @param bool|int $update
+     * @param Model $instance
+     *
      * @return bool|\Illuminate\Http\JsonResponse
+     *
      * @throws BadEventResultException
      */
-    protected function validateOnEvents($event_method, Request $request, array $input)
-    {
+    protected function validateOnEvents(
+        $event_method,
+        Request $request,
+        array $input,
+        $update = false,
+        Model $instance = null
+    ) {
         $fails = false;
         $errors = new MessageBag();
 
-        $event_collector = $this->call($event_method, $request, $input);
+        $event_collector = $this->call($event_method, $request, $input, $update, $instance);
+
         /** @var Validator $validator */
         foreach ($event_collector->events() as $validator) {
             $this->validateEventResponse($validator, $event_collector);
@@ -98,18 +107,33 @@ class EventCollector implements ICripObject
             }
         }
 
-        return $this->validationException($fails, $request, $errors);
+        if ($fails) {
+            return response()->json($errors, 422);
+        }
+
+        return null;
     }
 
     /**
      * @param $event_method
      * @param Request $request
      * @param array $input
+     * @param bool|int $update
+     * @param Model $instance
+     *
      * @return EventCollector
      */
-    private function call($event_method, Request $request, array $input)
+    private function call($event_method, Request $request, array $input, $update = false, Model $instance = null)
     {
-        return call_user_func_array([$this, $event_method], [$request, $input]);
+        $params = [$request, $input];
+        // If it is update action, id should be as first parameter in method
+        // and existing record model representation at the end
+        if ($update !== false) {
+            array_unshift($params, $update);
+            $params[] = $instance;
+        }
+
+        return call_user_func_array([$this, $event_method], $params);
     }
 
     /**

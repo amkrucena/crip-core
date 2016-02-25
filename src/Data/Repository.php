@@ -47,6 +47,13 @@ abstract class Repository implements IRepository, ICripObject
     protected $isSluggable = false;
 
     /**
+     * Avoid field update, if it is empty
+     *
+     * @var array
+     */
+    protected $avoidEmptyUpdate = ['password'];
+
+    /**
      * @param App $app
      * @param IFiltersInputService $filter
      * @param IRelationsInputService $relation
@@ -342,7 +349,15 @@ abstract class Repository implements IRepository, ICripObject
      */
     public function onlyFillable(array $input)
     {
-        return array_intersect_key($input, array_flip($this->modelInstance->getFillable()));
+        $result = array_intersect_key($input, array_flip($this->modelInstance->getFillable()));
+
+        foreach ($this->avoidEmptyUpdate as $avoid) {
+            if (array_key_exists($avoid, $result) && empty($result[$avoid])) {
+                unset($result[$avoid]);
+            }
+        }
+
+        return $result;
     }
 
     /**
