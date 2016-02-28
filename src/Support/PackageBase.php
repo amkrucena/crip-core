@@ -47,6 +47,7 @@ class PackageBase implements ICripObject
 
         $this->public_url = '/vendor/crip/' . $name . '/';
         $this->public_path = public_path($this->public_url);
+        $this->config_name = $name;
     }
 
     /**
