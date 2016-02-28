@@ -1,7 +1,6 @@
 <?php namespace Crip\Core\Support;
 
 use Crip\Core\Contracts\ICripObject;
-use Crip\UserManager\App\Services\UserService;
 
 /**
  * Class Help

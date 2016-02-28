@@ -1,6 +1,5 @@
 <?php namespace Crip\Core\Events;
 
-
 use Crip\Core\Contracts\ICripObject;
 
 /**

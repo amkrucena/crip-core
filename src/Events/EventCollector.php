@@ -1,11 +1,9 @@
 <?php namespace Crip\Core\Events;
 
 use Crip\Core\Contracts\ICripObject;
-use Crip\Core\Data\Model;
 use Crip\Core\Exceptions\BadEventResultException;
 use Crip\Core\Support\Help;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 
 /**

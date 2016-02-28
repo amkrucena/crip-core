@@ -7,7 +7,6 @@ use Crip\Core\Exceptions\BadDataQueryException;
 use Illuminate\Container\Container as App;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Crip\Core\Data\Model;
 use Input;
 
 /**
