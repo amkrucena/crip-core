@@ -8,7 +8,7 @@ use Exception;
  * Class BaseCripException
  * @package Crip\Core\Exceptions
  */
-class BaseCripException extends Exception
+class BaseCripException extends Exception implements ICripObject
 {
 
     /**

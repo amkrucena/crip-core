@@ -150,11 +150,12 @@ interface IRepository
     /**
      * @param array $input
      * @param int $id
+     * @param \Crip\Core\Data\Model $model
      * @param string $attribute
      *
-     * @return Model
+     * @return \Crip\Core\Data\Model
      */
-    public function update(array $input, $id, $attribute = 'id');
+    public function update(array $input, $id, Model $model = null, $attribute = 'id');
 
     /**
      * @param int $id

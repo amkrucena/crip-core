@@ -7,7 +7,7 @@ use Crip\Core\Exceptions\BadDataQueryException;
 use Illuminate\Container\Container as App;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Crip\Core\Data\Model;
 use Input;
 
 /**
@@ -286,13 +286,17 @@ abstract class Repository implements IRepository, ICripObject
     /**
      * @param array $input
      * @param int $id
+     * @param \Crip\Core\Data\Model $model
      * @param string $attribute
      *
-     * @return Model
+     * @return \Crip\Core\Data\Model
      */
-    public function update(array $input, $id, $attribute = 'id')
+    public function update(array $input, $id, Model $model = null, $attribute = 'id')
     {
-        $model = $this->find($id, $attribute);
+        if ($model == null) {
+            $model = $this->find($id, $attribute);
+        }
+
         $model->update($this->onlyFillable($input));
 
         return $model;

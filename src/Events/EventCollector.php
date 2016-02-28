@@ -25,16 +25,23 @@ class EventCollector implements ICripObject
      */
     private $event_names = null;
 
+    public function __construct()
+    {
+        $this->event_results = [];
+        $this->event_names = [];
+    }
+
     /**
      * Push event results to collection
      *
-     * @param array $event_results
-     * @param string $name
+     * @param array $results
+     * @param string|bool $name
+     *
      * @return $this
      */
-    protected function push(array $event_results, $name = false)
+    public function push(array $results, $name = false)
     {
-        $this->event_results = array_merge($this->event_results, $event_results);
+        $this->event_results = array_merge($this->event_results, $results);
 
         if ($name) {
             $this->event_names[] = $name;
@@ -44,16 +51,29 @@ class EventCollector implements ICripObject
     }
 
     /**
-     * Clear event results collection
-     *
-     * @return $this
+     * @return \Illuminate\Http\JsonResponse|null
+     * @throws BadEventResultException
      */
-    protected function clearEvents()
+    public function asValidator()
     {
-        $this->event_results = [];
-        $this->event_names = [];
+        $fails = false;
+        $errors = new MessageBag();
 
-        return $this;
+        /** @var Validator $validator */
+        foreach($this->events() as $validator) {
+            $this->validateValidationEventResponse($validator);
+
+            if ($validator->fails()) {
+                $fails = true;
+                $errors->merge($validator->getMessageBag()->toArray());
+            }
+        }
+
+        if ($fails) {
+            return response()->json($errors, 422);
+        }
+
+        return null;
     }
 
     /**
@@ -75,77 +95,15 @@ class EventCollector implements ICripObject
     }
 
     /**
-     * @param $event_method
-     * @param Request $request
-     * @param array $input
-     * @param bool|int $update
-     * @param Model $instance
-     *
-     * @return bool|\Illuminate\Http\JsonResponse
-     *
+     * @param $validator
      * @throws BadEventResultException
      */
-    protected function validateOnEvents(
-        $event_method,
-        Request $request,
-        array $input,
-        $update = false,
-        Model $instance = null
-    ) {
-        $fails = false;
-        $errors = new MessageBag();
-
-        $event_collector = $this->call($event_method, $request, $input, $update, $instance);
-
-        /** @var Validator $validator */
-        foreach ($event_collector->events() as $validator) {
-            $this->validateEventResponse($validator, $event_collector);
-
-            if ($validator->fails()) {
-                $fails = true;
-                $errors->merge($validator->getMessageBag()->toArray());
-            }
-        }
-
-        if ($fails) {
-            return response()->json($errors, 422);
-        }
-
-        return null;
-    }
-
-    /**
-     * @param $event_method
-     * @param Request $request
-     * @param array $input
-     * @param bool|int $update
-     * @param Model $instance
-     *
-     * @return EventCollector
-     */
-    private function call($event_method, Request $request, array $input, $update = false, Model $instance = null)
+    private function validateValidationEventResponse($validator)
     {
-        $params = [$request, $input];
-        // If it is update action, id should be as first parameter in method
-        // and existing record model representation at the end
-        if ($update !== false) {
-            array_unshift($params, $update);
-            $params[] = $instance;
-        }
-
-        return call_user_func_array([$this, $event_method], $params);
-    }
-
-    /**
-     * @param $response
-     * @param EventCollector $collector
-     * @throws BadEventResultException
-     */
-    private function validateEventResponse($response, EventCollector $collector)
-    {
-        if (!Help::isInstanceOf(Validator::class, $response)) {
-            $events = $collector->eventNames();
+        if (!Help::isInstanceOf(Validator::class, $validator)) {
+            $events = $this->eventNames();
             throw new BadEventResultException($this, $events, Validator::class);
         }
     }
+
 }
