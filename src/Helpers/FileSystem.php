@@ -1,5 +1,8 @@
 <?php namespace Crip\Core\Helpers;
 
+use ErrorException;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+
 /**
  * Class FileSystem
  * @package Crip\Core\Helpers
@@ -98,5 +101,87 @@ class FileSystem
     public static function type($path)
     {
         return filetype($path);
+    }
+
+    /**
+     * Get the file name from provided path
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    public static function nameFromPath($path)
+    {
+        return basename($path);
+    }
+
+    /**
+     * Trim file name from provided path
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    public static function trimFileName($path)
+    {
+        $name = static::nameFromPath($path);
+
+        return substr($path, 0, strlen($path) - strlen($name));
+    }
+
+    /**
+     * Get the path separate from name
+     *
+     * @param string $path
+     *
+     * @return array
+     */
+    public static function splitNameFromPath($path)
+    {
+        $name = static::nameFromPath($path);
+        $path = static::trimFileName($path);
+
+        return [$path, $name];
+    }
+
+    /**
+     * Get the file mime content type from provided path
+     *
+     * @param string $path
+     * @return string
+     *
+     * @throws FileNotFoundException
+     */
+    public static function getMimeType($path)
+    {
+        if (static::exists($path)) {
+            return mime_content_type($path);
+        }
+
+        throw new FileNotFoundException();
+    }
+
+    /**
+     * Delete the file at a given path.
+     *
+     * @param  string|array $paths
+     * @return bool
+     */
+    public static function delete($paths)
+    {
+        $paths = is_array($paths) ? $paths : func_get_args();
+        $deleted = true;
+
+        foreach ($paths as $path) {
+            try {
+                if (!@unlink($path)) {
+                    $deleted = false;
+                }
+            } catch (ErrorException $e) {
+                $deleted = false;
+            }
+        }
+
+        return $deleted;
     }
 }

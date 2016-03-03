@@ -101,4 +101,17 @@ class PackageBase implements ICripObject
 
         return config($key, $default);
     }
+
+    /**
+     * Merge target array with values from configuration file
+     *
+     * @param array $target
+     * @param $config_key
+     *
+     * @param array $default
+     */
+    public function mergeWithConfig(array &$target, $config_key, $default = [])
+    {
+        $target = array_merge_recursive($target, $this->config($config_key, $default));
+    }
 }
