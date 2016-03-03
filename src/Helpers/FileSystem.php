@@ -24,13 +24,15 @@ class FileSystem
     /**
      * Joins a split file system path.
      *
-     * @param array $path The split path.
+     * @param string|array $paths The split path.
      *
      * @return string The joined path.
      */
-    public static function join(array $path)
+    public static function join($paths)
     {
-        return join(DIRECTORY_SEPARATOR, $path);
+        $paths = is_array($paths) ? $paths : func_get_args();
+
+        return join(DIRECTORY_SEPARATOR, $paths);
     }
 
     /**
@@ -183,5 +185,33 @@ class FileSystem
         }
 
         return $deleted;
+    }
+
+    /**
+     * Delete directory recursive
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    public static function deleteDirectory($path)
+    {
+        if(!is_dir($path)) {
+            return false;
+        }
+
+        $files = array_diff(scandir($path), array('.', '..'));
+        foreach ($files as $file) {
+            $inner_file = join('/', [$path, $file]);
+            if (is_dir($inner_file)) {
+                // Delete inner directory recursive
+                static::deleteDirectory($inner_file);
+            } else {
+                // Delete file
+                unlink($inner_file);
+            }
+        }
+
+        return rmdir($path);
     }
 }
