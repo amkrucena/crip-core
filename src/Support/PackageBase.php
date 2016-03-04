@@ -107,11 +107,15 @@ class PackageBase implements ICripObject
      *
      * @param array $target
      * @param $config_key
-     *
      * @param array $default
+     * @param bool $recursive
      */
-    public function mergeWithConfig(array &$target, $config_key, $default = [])
+    public function mergeWithConfig(array &$target, $config_key, $default = [], $recursive = true)
     {
-        $target = array_merge_recursive($target, $this->config($config_key, $default));
+        if ($recursive) {
+            $target = array_merge_recursive($target, $this->config($config_key, $default));
+        } else {
+            $target = array_merge($target, $this->config($config_key, $default));
+        }
     }
 }

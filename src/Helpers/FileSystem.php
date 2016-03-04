@@ -196,13 +196,13 @@ class FileSystem
      */
     public static function deleteDirectory($path)
     {
-        if(!is_dir($path)) {
+        if (!is_dir($path)) {
             return false;
         }
 
-        $files = array_diff(scandir($path), array('.', '..'));
+        $files = array_diff(scandir($path), ['.', '..']);
         foreach ($files as $file) {
-            $inner_file = join('/', [$path, $file]);
+            $inner_file = static::join($path, $file);
             if (is_dir($inner_file)) {
                 // Delete inner directory recursive
                 static::deleteDirectory($inner_file);
@@ -213,5 +213,30 @@ class FileSystem
         }
 
         return rmdir($path);
+    }
+
+    /**
+     * Calculate directory size including sub-folders
+     *
+     * @param string $path
+     * @param array $exclude
+     *
+     * @return int
+     */
+    public static function dirSize($path, array $exclude = [])
+    {
+        if (!is_dir($path)) {
+            return 0;
+        }
+
+        $size = 0;
+        $exclude = array_merge(['.', '..'], $exclude);
+        $items = array_diff(scandir($path), $exclude);
+        foreach ($items as $item) {
+            $inner_item = static::join($path, $item);
+            $size += is_file($inner_item) ? filesize($inner_item) : static::dirSize($inner_item, $exclude);
+        }
+
+        return $size;
     }
 }
