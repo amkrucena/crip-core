@@ -31,6 +31,24 @@ class Str
      */
     public static function toArray($string, $split = '/ ?[,|] ?/')
     {
-        return (!is_array($string)) ? preg_split('/ ?[,|] ?/', $string) : $string;
+        return (!is_array($string)) ? preg_split($split, $string) : $string;
+    }
+
+    /**
+     * Normalize path string. Will remove slash at the beginning if presented.
+     * @param string $path Path to be normalized.
+     * @param array $filter Element values, with should be removed. Default is empty string, dot and '..'.
+     * @param string $separator Path separator char. Default value is '/'.
+     * @return string Normalized path.
+     */
+    public static function normalizePath($path, $filter = ['', '.', '..'], $separator = '/')
+    {
+        $parts = explode('/', trim(str_replace('\\', '/', $path), '/'));
+
+        $filterMethod = function ($segment) use ($filter) {
+            return !in_array($segment, $filter);
+        };
+
+        return join($separator, array_filter($parts, $filterMethod));
     }
 }
