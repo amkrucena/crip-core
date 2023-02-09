@@ -2,7 +2,7 @@
   "name": "crip/core",
   "description": "Crip Laravel core",
   "require": {
-    "laravel/framework": "^5.1"
+    "laravel/framework": "^9"
   },
   "autoload": {
     "psr-4": {
